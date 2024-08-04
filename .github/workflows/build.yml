@@ -135,13 +135,22 @@ jobs:
 
     steps:
       - name: Checkout code
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v3
-      - uses: aws-actions/setup-sam@v2
-      - uses: aws-actions/configure-aws-credentials@v1
-        with:
-          fetch-depth: 0
+        uses: actions/checkout@v3
+
       - name: Set up Python
+        uses: actions/setup-python@v3
+
+      - name: Set up SAM CLI
+        uses: aws-actions/setup-sam@v2
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Set up Python 3.9
         uses: actions/setup-python@v2
         with:
           python-version: '3.9'
@@ -251,9 +260,11 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y awscli
+
       - name: Install SAM CLI
         run: |
           pip install aws-sam-cli
+
       - name: Configure AWS CLI
         run: |
           mkdir -p ~/.aws
@@ -261,8 +272,11 @@ jobs:
           echo "aws_access_key_id=${{ secrets.AWS_ACCESS_KEY_ID }}" >> ~/.aws/config
           echo "aws_secret_access_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> ~/.aws/config
           echo "region=us-east-1" >> ~/.aws/config
+
       - name: Build SAM application
         run: sam build --use-container
+
       - name: Deploy SAM application
         run: |
           sam deploy --no-confirm-changeset --no-fail-on-empty-changeset --stack-name SISPE --capabilities CAPABILITY_IAM
+  
